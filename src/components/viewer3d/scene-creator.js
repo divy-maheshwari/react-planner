@@ -12,7 +12,8 @@ export function parseData(sceneData, actions, catalog) {
     busyResources: { layers: {} },
     width: sceneData.width,
     height: sceneData.height,
-    LODs: {}
+    LODs: {},
+    // modelLayerID: {},
   };
 
   planData.plan = new Three.Object3D();
@@ -639,19 +640,41 @@ function updateArea(sceneData, oldSceneData, planData, layer, areaID, difference
   return catalog.getElement(area.type).updateRender3D(area, layer, sceneData, mesh, oldArea, differences, selfDestroy, selfBuild);
 }
 
-function addItem(sceneData, planData, layer, itemID, catalog, itemsActions) {
+// Generate a random angle within a certain range (in radians)
+function getRandomAngle(min, max) {
+  return Math.random() * (max - min) + min;
+}
 
+// Create a random direction vector in the xz plane
+function getRandomDirection() {
+  // Generate a random angle between 0 and 2π (360 degrees)
+  const angle = getRandomAngle(0, Math.PI * 2);
+  // Calculate x and z coordinates based on the angle
+  const x = Math.cos(angle);
+  const z = Math.sin(angle);
+  // Return the direction vector
+  return new Three.Vector3(x, 0, z);
+}
+
+function addItem(sceneData, planData, layer, itemID, catalog, itemsActions) {
   let item = layer.getIn(['items', itemID]);
 
   return catalog.getElement(item.type).render3D(item, layer, sceneData).then(item3D => {
 
     if (item3D instanceof Three.LOD) {
       planData.sceneGraph.LODs[itemID] = item3D;
+      // planData.sceneGraph.modelLayerID[itemID] = layer.id;
     }
 
     let pivot = new Three.Object3D();
     pivot.name = 'pivot';
     pivot.add(item3D);
+
+    // let movementParams = {
+    //   speed: 0.4, // Adjust speed as needed
+    //   direction: getRandomDirection() // Initial movement direction
+    // };
+    // pivot.movementParams = movementParams;
 
     pivot.rotation.y = item.rotation * Math.PI / 180;
     pivot.position.x = item.x;

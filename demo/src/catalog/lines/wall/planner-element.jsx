@@ -12,13 +12,26 @@ const info = {
 };
 
 const textures = {
+  // bricks: {
+  //   name: 'Bricks',
+  //   uri: require('./textures/bricks.jpg'),
+  //   lengthRepeatScale: 0.01,
+  //   heightRepeatScale: 0.01,
+  //   normal: {
+  //     uri: require('./textures/bricks-normal.jpg'),
+  //     lengthRepeatScale: 0.01,
+  //     heightRepeatScale: 0.01,
+  //     normalScaleX: 0.8,
+  //     normalScaleY: 0.8
+  //   }
+  // },
   bricks: {
     name: 'Bricks',
-    uri: require('./textures/bricks.jpg'),
+    uri: require('./textures/painted.jpg'),
     lengthRepeatScale: 0.01,
     heightRepeatScale: 0.01,
     normal: {
-      uri: require('./textures/bricks-normal.jpg'),
+      uri: require('./textures/painted-normal.jpg'),
       lengthRepeatScale: 0.01,
       heightRepeatScale: 0.01,
       normalScaleX: 0.8,

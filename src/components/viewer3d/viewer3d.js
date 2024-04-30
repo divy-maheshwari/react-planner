@@ -8,6 +8,7 @@ import diff from "immutablediff";
 import * as SharedStyle from "../../styles/shared-style";
 import ReactPlannerContext from "../../utils/react-planner-context";
 import { usePrevious } from "@uidotdev/usehooks";
+import axios from 'axios';
 
 let mouseDownEvent = null;
 let mouseUpEvent = null;
@@ -19,10 +20,11 @@ const lastMousePosition = {};
 let renderingID = "";
 
 const Scene3DViewer = (props) => {
+  console.log("rerendering")
   const previousProps = usePrevious(props);
   let canvasWrapper = useRef(null);
   const actions = useContext(ReactPlannerContext);
-  const { projectActions, catalog } = actions;
+  const { projectActions, catalog, viewer3DActions } = actions;
 
   const [renderer, _setRenderer] = useState(
     window.__threeRenderer ||
@@ -30,7 +32,8 @@ const Scene3DViewer = (props) => {
   );
   window.__threeRenderer = renderer;
 
-  const { width, height } = props;
+  const { width, height, state } = props;
+  const planData = parseData(state.scene, actions, catalog);
 
   useEffect(() => {
     let { state } = props;
@@ -42,7 +45,7 @@ const Scene3DViewer = (props) => {
     renderer.setSize(width, height);
 
     // LOAD DATA
-    const planData = parseData(state.scene, actions, catalog);
+    // const planData = parseData(state.scene, actions, catalog);
 
     scene3D.add(planData.plan);
     scene3D.add(planData.grid);
@@ -140,6 +143,11 @@ const Scene3DViewer = (props) => {
       camera.updateMatrixWorld();
 
       for (let elemID in planData.sceneGraph.LODs) {
+        // let item = planData.sceneGraph.layers[planData.sceneGraph.modelLayerID[elemID]].items[elemID];
+        // let movementParams = item.movementParams;
+        // // Move the item in the specified direction
+        // item.position.addScaledVector(movementParams.direction, movementParams.speed);
+
         planData.sceneGraph.LODs[elemID].update(camera);
       }
 
@@ -183,6 +191,7 @@ const Scene3DViewer = (props) => {
 
     if (previousProps && props.state.scene !== previousProps.state.scene) {
       let changedValues = diff(previousProps.state.scene, props.state.scene);
+      console.log({changedValues})
       updateScene(
         planDataP,
         props.state.scene,
@@ -195,6 +204,24 @@ const Scene3DViewer = (props) => {
 
     renderer.setSize(props.width, props.height);
   }, [props]);
+
+  useEffect(() => {
+    fetchData();
+    const intervalId = setInterval(fetchData, 5000);
+    return () => clearInterval(intervalId);
+  }, []);
+
+  const fetchData = () => {
+    axios.get('http://localhost:8080/')
+      .then(response => {
+        projectActions.loadProject(response.data);
+        
+        viewer3DActions.selectTool3DView()
+      })
+      .catch(error => {
+        console.error('Error fetching data:', error);
+      });
+  };
 
   return <div ref={canvasWrapper} />;
 };
