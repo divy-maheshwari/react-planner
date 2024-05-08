@@ -103,15 +103,18 @@ export function updateScene(planData, sceneData, oldSceneData, diffArray, action
         removeLayer(path[2], planData);
       } else if (path.length > 3) {
         switch (op) {
-          case 'replace':
+          case 'replace': {
             replaceObject(path, layer, planData, actions, sceneData, oldSceneData, catalog);
             break;
-          case 'add':
+          }
+          case 'add': {
             addObject(path, layer, planData, actions, sceneData, oldSceneData, catalog);
             break;
-          case 'remove':
+          }
+          case 'remove': {
             removeObject(path, layer, planData, actions, sceneData, oldSceneData, catalog);
             break;
+          }
         }
       }
     } else if (path[1] === 'selectedLayer') {
@@ -141,14 +144,12 @@ export function updateScene(planData, sceneData, oldSceneData, diffArray, action
 }
 
 function replaceObject(modifiedPath, layer, planData, actions, sceneData, oldSceneData, catalog) {
-
   let promises = [];
 
   switch (modifiedPath[3]) {
     case 'vertices':
       if (modifiedPath[5] !== 'selected') {
         let vertex = layer.getIn(['vertices', modifiedPath[4]]);
-
         if (modifiedPath[5] === 'x' || modifiedPath[5] === 'y') {
           vertex.lines.forEach(lineID => {
             let lineHoles = oldSceneData.getIn(['layers',layer.id, 'lines', lineID, 'holes' ]);

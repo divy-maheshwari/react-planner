@@ -8,7 +8,6 @@ import diff from "immutablediff";
 import * as SharedStyle from "../../styles/shared-style";
 import ReactPlannerContext from "../../utils/react-planner-context";
 import { usePrevious } from "@uidotdev/usehooks";
-import axios from 'axios';
 
 let mouseDownEvent = null;
 let mouseUpEvent = null;
@@ -24,7 +23,7 @@ const Scene3DViewer = (props) => {
   const previousProps = usePrevious(props);
   let canvasWrapper = useRef(null);
   const actions = useContext(ReactPlannerContext);
-  const { projectActions, catalog, viewer3DActions } = actions;
+  const { projectActions, catalog } = actions;
 
   const [renderer, _setRenderer] = useState(
     window.__threeRenderer ||
@@ -204,24 +203,6 @@ const Scene3DViewer = (props) => {
 
     renderer.setSize(props.width, props.height);
   }, [props]);
-
-  useEffect(() => {
-    fetchData();
-    const intervalId = setInterval(fetchData, 5000);
-    return () => clearInterval(intervalId);
-  }, []);
-
-  const fetchData = () => {
-    axios.get('http://localhost:8080/')
-      .then(response => {
-        projectActions.loadProject(response.data);
-        
-        viewer3DActions.selectTool3DView()
-      })
-      .catch(error => {
-        console.error('Error fetching data:', error);
-      });
-  };
 
   return <div ref={canvasWrapper} />;
 };

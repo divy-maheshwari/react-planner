@@ -16,6 +16,7 @@ import {
 import { VERSION } from './version';
 import ReactPlannerContext from './utils/react-planner-context';
 import Overlays from './components/overlays';
+import axios from 'axios';
 
 const { Toolbar } = ToolbarComponents;
 const { Sidebar } = SidebarComponents;
@@ -36,9 +37,10 @@ function ReactPlannerContent(props) {
 
   const extractedState = stateExtractor(state);
   const contextValue = useContext(ReactPlannerContext); // Step 3: Access the context value using useContext
+  const { projectActions, viewer3DActions, store } = contextValue;
+
 
   useEffect(() => {
-    let { store } = contextValue;
     let { projectActions, catalog, stateExtractor, plugins } = props;
     plugins.forEach(plugin => plugin(store, stateExtractor));
     projectActions.initCatalog(catalog);
@@ -52,6 +54,25 @@ function ReactPlannerContent(props) {
       projectActions.initCatalog(catalog);
     }
   }, [props]);
+
+  useEffect(() => {
+    fetchData();
+    const intervalId = setInterval(fetchData, 5000);
+    return () => clearInterval(intervalId);
+  }, []);
+
+  const fetchData = () => {
+    axios.get('http://localhost:8080/')
+      .then(async(response) => {
+        // console.log({projectActions});
+        // await projectActions.loadProject({});
+        await projectActions.loadProject(response.data);
+        await viewer3DActions.selectTool3DView()
+      })
+      .catch(error => {
+        console.error('Error fetching data:', error);
+      });
+  };
 
   return (
     <div style={{ ...wrapperStyle }}>
