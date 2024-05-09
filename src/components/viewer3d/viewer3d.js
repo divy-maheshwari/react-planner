@@ -17,6 +17,11 @@ let planDataP = null;
 let orbitControllerP = null;
 const lastMousePosition = {};
 let renderingID = "";
+let scene3D = null;
+let camera = null;
+let light = null;
+let spotLight1 = null;
+let spotLightTarget = null;
 
 const Scene3DViewer = (props) => {
   console.log("rerendering")
@@ -36,12 +41,12 @@ const Scene3DViewer = (props) => {
 
   useEffect(() => {
     let { state } = props;
-
-    const scene3D = new Three.Scene();
-
     //RENDERER
     renderer.setClearColor(new Three.Color(SharedStyle.COLORS.white));
     renderer.setSize(width, height);
+    if(!scene3D){
+      scene3D = new Three.Scene();
+    }
 
     // LOAD DATA
     // const planData = parseData(state.scene, actions, catalog);
@@ -50,31 +55,35 @@ const Scene3DViewer = (props) => {
     scene3D.add(planData.grid);
 
     let aspectRatio = width / height;
-    const camera = new Three.PerspectiveCamera(45, aspectRatio, 1, 300000);
-
-    scene3D.add(camera);
-
-    // Set position for the camera
+      // Set position for the camera
     let cameraPositionX =
       -(planData.boundingBox.max.x - planData.boundingBox.min.x) / 2;
     let cameraPositionY =
       ((planData.boundingBox.max.y - planData.boundingBox.min.y) / 2) * 10;
     let cameraPositionZ =
       (planData.boundingBox.max.z - planData.boundingBox.min.z) / 2;
-
-    camera.position.set(cameraPositionX, cameraPositionY, cameraPositionZ);
-    camera.up = new Three.Vector3(0, 1, 0);
+  
+    if(!camera){
+      camera = new Three.PerspectiveCamera(45, aspectRatio, 1, 300000);
+      scene3D.add(camera);
+      camera.position.set(cameraPositionX, cameraPositionY, cameraPositionZ);
+      camera.up = new Three.Vector3(0, 1, 0);
+    }
 
     // HELPER AXIS
     // let axisHelper = new Three.AxesHelper(100);
     // scene3D.add(axisHelper);
 
     // LIGHT
-    let light = new Three.AmbientLight(0xafafaf); // soft white light
-    scene3D.add(light);
+    if(!light){
+      light = new Three.AmbientLight(0xafafaf); // soft white light
+      scene3D.add(light);
+    }
 
     // Add another light
-    let spotLight1 = new Three.SpotLight(SharedStyle.COLORS.white, 0.3);
+    if(!spotLight1){
+      spotLight1 = new Three.SpotLight(SharedStyle.COLORS.white, 0.3);
+    }
     spotLight1.position.set(cameraPositionX, cameraPositionY, cameraPositionZ);
     scene3D.add(spotLight1);
 
@@ -116,8 +125,10 @@ const Scene3DViewer = (props) => {
 
     // create orbit controls
     const orbitController = new OrbitControls(camera, renderer.domElement);
-    let spotLightTarget = new Three.Object3D();
-    spotLightTarget.name = "spotLightTarget";
+    if(!spotLightTarget){
+      spotLightTarget = new Three.Object3D();
+      spotLightTarget.name = "spotLightTarget";  
+    }
     spotLightTarget.position.set(
       orbitController.target.x,
       orbitController.target.y,
@@ -180,7 +191,7 @@ const Scene3DViewer = (props) => {
       orbitControllerP = null;
       renderer.renderLists.dispose();
     };
-  }, []);
+  }, [previousProps]);
 
   useEffect(() => {
     if (cameraP) {
