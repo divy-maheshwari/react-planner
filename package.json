@@ -83,6 +83,8 @@
     "react-redux": "7.2.9",
     "react-svg-pan-zoom": "^3.12.1",
     "react-tabs": "6.0.1",
+    "redis": "^4.6.13",
+    "redis-om": "^0.4.3",
     "redux": "4.0.1",
     "shortid": "2.2.14"
   },

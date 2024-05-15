@@ -16,6 +16,7 @@ import {
 import { VERSION } from './version';
 import ReactPlannerContext from './utils/react-planner-context';
 import Overlays from './components/overlays';
+import {getDeviceTwinData} from '../services/index'
 import axios from 'axios';
 
 const { Toolbar } = ToolbarComponents;
@@ -61,17 +62,15 @@ function ReactPlannerContent(props) {
     return () => clearInterval(intervalId);
   }, []);
 
-  const fetchData = () => {
-    axios.get('http://localhost:8080/')
-      .then(async(response) => {
-        // console.log({projectActions});
-        // await projectActions.loadProject({});
-        await projectActions.loadProject(response.data);
-        await viewer3DActions.selectTool3DView()
-      })
-      .catch(error => {
-        console.error('Error fetching data:', error);
-      });
+  const fetchData = async () => {
+    try {
+      const data = await getDeviceTwinData();
+      await projectActions.loadProject(data);
+      await viewer3DActions.selectTool3DView();
+    }
+    catch(error) {
+      console.error('Error fetching data:', error);
+    }
   };
 
   return (
